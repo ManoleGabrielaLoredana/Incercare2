@@ -2,45 +2,23 @@
 
 namespace aplicatie1
 {
-    public abstract class Account
+    public class AtmSingleton
     {
-        public decimal Balance { get; private set; }
-        public void Deposit(decimal amount)
+        private readonly DebitAccount _debitAccount;
+        private static readonly AtmSingleton _instance = new AtmSingleton();
+        private AtmSingleton()
         {
-            this.Balance += amount;
+            _debitAccount = new DebitAccount();
         }
-        public decimal Withdraw(decimal amount)
-        {
-            var fee = CalculateWithDrawFee(amount);
-            amount += fee;
-            if (Balance < amount)
-            {
-                throw new InvalidOperationException("Insufficient funds!");
-            }
-            this.Balance -= amount;
-            return amount;
-        }
-        protected abstract decimal CalculateWithDrawFee(decimal amount);
-    }
-    public class DebitAccount : Account
-    {
-        protected override decimal CalculateWithDrawFee(decimal amount)
-        {
-            return 0m;
-        }
-    }
-    public class SavingAccount : Account
-    {
-        protected override decimal CalculateWithDrawFee(decimal amount)
-        {
-            return amount * 0.5m / 100m;
-        }
+        public static AtmSingleton TheATM => _instance;
+        public DebitAccount DebitAccount => _debitAccount;
     }
     class Program
     {
         private const int Amount = 500;
         static void Main(string[] args)
         {
+            AtmSingleton.TheATM.DebitAccount.Deposit(100);
             var account = new SavingAccount();
             account.Deposit(200);
             System.Console.WriteLine($"Disponibil: {account.Balance} RON");
